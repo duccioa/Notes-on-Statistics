@@ -50,19 +50,40 @@ plot_norm <- function(lb,
                          mapping = aes(x = x, ymin = ymin, ymax = ymax), 
                          fill = col, 
                          alpha = alpha)
-    for(i in 1:3) {
-        lb_i <- get(paste("lb", i, sep = ""))
-        ub_i <- get(paste("ub", i, sep = ""))
-        col_i <- get(paste("col", i, sep = ""))
-        if(lb_i != "a") {
-            xmin <- max(lb_i, limits[1])
-            xmax <- min(ub_i, limits[2])
-            g <- g + geom_ribbon(data = area, 
-                                 mapping = aes(x = x, ymin = ymin, ymax = ymax), 
-                                 fill = col_i, 
-                                 alpha = alpha)
-            }
-           }
+    
+    
+    
+    if(lb1 != "a")
+        {x <- seq(limits[1], limits[2], length.out = 100)
+    xmin <- max(lb1, limits[1])
+    xmax <- min(ub1, limits[2])
+    areax <- seq(xmin, xmax, length.out = 100)
+    area <- data.frame(x = areax, ymin = 0, ymax = dnorm(areax, mean = mean, sd = sd))
+    g <- g + geom_ribbon(data = area, 
+                         mapping = aes(x = x, ymin = ymin, ymax = ymax), 
+                         fill = col1, 
+                         alpha = alpha)}
+    if(lb2 != "a")
+        {x <- seq(limits[1], limits[2], length.out = 100)
+    xmin <- max(lb2, limits[1])
+    xmax <- min(ub2, limits[2])
+    areax <- seq(xmin, xmax, length.out = 100)
+    area <- data.frame(x = areax, ymin = 0, ymax = dnorm(areax, mean = mean, sd = sd))
+    g <- g + geom_ribbon(data = area, 
+                         mapping = aes(x = x, ymin = ymin, ymax = ymax), 
+                         fill = col2, 
+                         alpha = alpha)}
+    if(lb3 != "a")
+        {x <- seq(limits[1], limits[2], length.out = 100)
+    xmin <- max(lb3, limits[1])
+    xmax <- min(ub3, limits[2])
+    areax <- seq(xmin, xmax, length.out = 100)
+    area <- data.frame(x = areax, ymin = 0, ymax = dnorm(areax, mean = mean, sd = sd))
+    g <- g + geom_ribbon(data = area, 
+                         mapping = aes(x = x, ymin = ymin, ymax = ymax), 
+                         fill = col3, 
+                         alpha = alpha)}
+    
     
     g <- g + scale_x_continuous(limits = limits)
     g
@@ -172,5 +193,19 @@ $$X \sim N(\mu,\sigma^2)$$
 **STANDARD NORMAL DISTRIBUTION** : is the specific case of a normal distribution with $\mu = 0$ and $\sigma = 1$  
 $$X \sim N(0,1)$$ 
 with probability mass function $$f(x) = \frac{e^{-1/2x^2}}{\sqrt{2\pi}}$$
+
+```{r,echo=FALSE}
+g <- plot_norm(lb = -1, ub = 1, lb1 = -2, ub1 = 2, lb2 = -Inf, ub2 = Inf, alpha = .2, col = "blue", col1 = "blue", col2 = "blue")
+g <- g + annotate("text", x = 1, y = -0.02, label = "sigma", parse = TRUE)
+g <- g + annotate("text", x = -1, y = -0.02, label = "-sigma", parse = TRUE)
+g <- g + annotate("text", x = 2, y = -0.02, label = "2*sigma", parse = TRUE)
+g <- g + annotate("text", x = -2, y = -0.02, label = "-2*sigma", parse = TRUE)
+g 
+```   
+
+
+
+
+
 
 
