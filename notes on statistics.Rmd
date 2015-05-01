@@ -23,10 +23,19 @@ library(ggplot2)
 #' normal_prob_area_plot(-1, 1)
 plot_norm <- function(lb, 
                       ub, 
+                      lb1 = "a",
+                      ub1 = NA,
+                      lb2 = "a",
+                      ub2 = NA,
+                      lb3 = "a",
+                      ub3 = NA,
                       mean = 0, 
                       sd = 1, 
                       limits = c(mean - 3 * sd, mean + 3 * sd), 
-                      col = "blue",
+                      col = "gray78",
+                      col1 = "gray68",
+                      col2 = "gray58",
+                      col3 = "gray48",
                       alpha = .4) {
     x <- seq(limits[1], limits[2], length.out = 100)
     xmin <- max(lb, limits[1])
@@ -41,9 +50,23 @@ plot_norm <- function(lb,
                          mapping = aes(x = x, ymin = ymin, ymax = ymax), 
                          fill = col, 
                          alpha = alpha)
+    for(i in 1:3) {
+        lb_i <- get(paste("lb", i, sep = ""))
+        ub_i <- get(paste("ub", i, sep = ""))
+        col_i <- get(paste("col", i, sep = ""))
+        if(lb_i != "a") {
+            xmin <- max(lb_i, limits[1])
+            xmax <- min(ub_i, limits[2])
+            g <- g + geom_ribbon(data = area, 
+                                 mapping = aes(x = x, ymin = ymin, ymax = ymax), 
+                                 fill = col_i, 
+                                 alpha = alpha)
+            }
+           }
+    
     g <- g + scale_x_continuous(limits = limits)
-g
-}
+    g
+    }
 ```
 ## DEFINITIONS ##
 **POPULATION** : Entire aggregate of individuals or items from which SAMPLES are drawn.   
@@ -101,7 +124,7 @@ If the variable X takes values $x_1, ..., x_n$ with probabilities $p(x_1), ..., 
 - **Continuous variables** : The relevant area under the graph of its probability density function f(x) $$ P(x) = \int_\mathrm{x_0}^\mathrm{x_1} \mathrm{f(x)} \mathrm{d}x  $$
 
 ```{r, echo=FALSE}
-g <- plot_norm(lb = 0, ub = 0.8)
+g <- plot_norm(lb = 0, ub = 0.8, col = "blue")
 g <- g + annotate("text", x = -1.3, y = 0.3, parse = TRUE, label =" frac( 1, sqrt( 2 * pi)) * e ^ {-x ^ 2 / 2}", size = 4)
 g <- g + annotate("text", x = -1.9, y = 0.3, parse = FALSE, label ="f(x) = ", size = 4)
 g <- g + annotate("text", x = -0.2, y = 0, label="x[0]", parse=TRUE)
@@ -118,7 +141,7 @@ qnorm(.95)
 ```   
 
 ```{r, echo=FALSE,fig.width=5, fig.height=3.5}
-g <- plot_norm(lb = -Inf, ub = qnorm(.95))
+g <- plot_norm(lb = -Inf, ub = qnorm(.95), col = "blue")
 g <- g + annotate("text", x = round(qnorm(.95), 2), y = -0.015, label= paste("x = ",round(qnorm(.95), 2)))
 g <- g + annotate("text", x = 0, y = 0.04, label = "95%")
 g <- g + annotate("text", x = 2, y = 0.03, label = "5%")
