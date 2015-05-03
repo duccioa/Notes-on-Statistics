@@ -89,6 +89,54 @@ plot_norm <- function(lb,
     g
     }
 ```
+
+```{r Multiplot, echo=FALSE}
+# Multiple plot function
+#
+# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# - cols:   Number of columns in layout
+# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+#
+# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# then plot 1 will go in the upper left, 2 will go in the upper right, and
+# 3 will go all the way across the bottom.
+#
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+```
 ## DEFINITIONS ##
 **POPULATION** : Entire aggregate of individuals or items from which SAMPLES are drawn.   
 
@@ -184,6 +232,12 @@ $\pagebreak$
 * *Variance* : $Var(X) = p(1-p)$   
 
 **BINOMIAL** : is obtained as the sum of a bunch of iid bernoulli random variables (ex. number of heads on a biased coin). Let $x_1, ..., X_n$ be an iid Bernoulli with probability p, then $$X = \sum{i=1}^{n} x_i$$ is a *binomial random variable* with mass function $$P(X = x_i) = \binom{n}{k}p^{x_1}(1-p)^{1-x_1}$$  
+*EXAMPLE : You don't believe that your friend can discern good wine from cheap. Assuming that you're right, in a blind test where you randomize 6 paired varieties (Merlot, Chianti, ...) of cheap and expensive wines.  
+What is the change that she gets 5 or 6 right expressed as a percentage to one decimal place?
+
+```{r}
+round(pbinom(4, prob = .5, size = 6, lower.tail = FALSE) * 100, 1)
+```
 
 **NORMAL DISTRIBUTION** Gaussian distribution with mean $\mu$ and variance $\sigma^2$  
 $$X \sim N(\mu,\sigma^2)$$  
@@ -192,20 +246,166 @@ $$X \sim N(\mu,\sigma^2)$$
 
 **STANDARD NORMAL DISTRIBUTION** : is the specific case of a normal distribution with $\mu = 0$ and $\sigma = 1$  
 $$X \sim N(0,1)$$ 
-with probability mass function $$f(x) = \frac{e^{-1/2x^2}}{\sqrt{2\pi}}$$
+* with *probability mass function* $$f(x) = \frac{e^{-1/2x^2}}{\sqrt{2\pi}}$$
 
-```{r,echo=FALSE}
-g <- plot_norm(lb = -1, ub = 1, lb1 = -2, ub1 = 2, lb2 = -Inf, ub2 = Inf, alpha = .2, col = "blue", col1 = "blue", col2 = "blue")
-g <- g + annotate("text", x = 1, y = -0.02, label = "sigma", parse = TRUE)
-g <- g + annotate("text", x = -1, y = -0.02, label = "-sigma", parse = TRUE)
-g <- g + annotate("text", x = 2, y = -0.02, label = "2*sigma", parse = TRUE)
-g <- g + annotate("text", x = -2, y = -0.02, label = "-2*sigma", parse = TRUE)
-g 
+$\pagebreak$
+
+* Facts about the STANDARD NORMAL DISTRIBUTION   
+
+```{r,echo=FALSE, fig.height = 2, fig.width=3}
+text_size <- 2
+g1 <- plot_norm(lb = -1, ub = 1, alpha = .2, col = "blue")
+g1 <- g1 + annotate("text", x = 1, y = -0.02, label = "sigma", parse = TRUE, size = text_size)
+g1 <- g1 + annotate("text", x = -1, y = -0.02, label = "-sigma", parse = TRUE, size = text_size)
+
+g1 <- g1 + annotate("text", x = 0, y = .1, label = paste(round((1-2*pnorm(1, lower.tail = FALSE))*100, 2), "%", sep = ""), size = text_size)
+g1 + theme(axis.title=element_blank())
+ 
+```   
+```{r,echo=FALSE, fig.height = 2, fig.width=3}
+text_size <- 2
+g2 <- plot_norm(lb = -2, ub = 2, alpha = .2, col = "blue")
+g2 <- g2 + annotate("text", x = 2, y = -0.02, label = "2*sigma", parse = TRUE, size = text_size)
+g2 <- g2 + annotate("text", x = -2, y = -0.02, label = "-2*sigma", parse = TRUE, size = text_size)
+g2 <- g2 + annotate("text", x = 0, y = .1, label = paste(round((1-2*pnorm(2, lower.tail = FALSE))*100, 2), "%", sep = ""), size = text_size)
+g2 + theme(axis.title=element_blank())
+
+```
+
+```{r,echo=FALSE, fig.height = 2, fig.width=3}
+text_size <- 2
+g3 <- plot_norm(lb = -3, ub = 3, alpha = .2, col = "blue")
+g3 <- g3 + annotate("text", x = 3, y = -0.02, label = "3*sigma", parse = TRUE, size = text_size)
+g3 <- g3 + annotate("text", x = -3, y = -0.02, label = "-3*sigma", parse = TRUE, size = text_size)
+g3 <- g3 + annotate("text", x = 0, y = .1, label = paste(round((1-2*pnorm(3, lower.tail = FALSE))*100, 2), "%", sep = ""), size = text_size)
+g3 + theme(axis.title = element_blank())
+
+```  
+
+```{r, echo=FALSE,fig.height = 4, fig.width=5.5}
+text_size <- 2
+g <- plot_norm(lb = 1.28, ub = Inf, lb1 = 1.645, ub1 = Inf, lb2 = 1.96, ub2 = Inf, lb3 = 2.33, ub3 = Inf, alpha = .4, col = "blue")
+g <- g + annotate("text", x = 1.28, y = -0.01, label = 1.28, size = text_size)
+g <- g + annotate("text", x = 1.645, y = -0.02, label = 1.645, size = text_size)
+g <- g + annotate("text", x = 1.96, y = -0.01, label = 1.96, size = text_size)
+g <- g + annotate("text", x = 2.33, y = -0.02, label = 2.33, size = text_size)
+
+g <- g + annotate("text", x = 1.28 + 0.6, y = 0.18, label = "90th percentile", size = text_size)
+g <- g + annotate("text", x = 1.645 + 0.6, y = 0.1, label = "95th percentile", size = text_size)
+g <- g + annotate("text", x = 1.96 + 0.6, y = .05, label = "97.5th percentile", size = text_size)
+g <- g + annotate("text", x = 2.33 + 0.6, y = .025, label = "99th percentile", size = text_size)
+g + theme(axis.title = element_blank())
+```
+
+* EXAMPLE : the probability of x being 2 *standard deviations* bigger than the mean:
+```{r}
+pnorm(2, lower.tail = FALSE)
+```   
+* EXAMPLE : the probability of x being within 2 *standard deviations* from the mean:
+```{r}
+pnorm(2)
+```   
+* EXAMPLE : find the interval within which x has 90% of probability of being, $90^{th}$ *quantile*  
+```{r}
+qnorm(.90)
+```
+* EXAMPLE : generate a *normal distribution*  
+```{r}
+x <- rnorm(10000)
+qplot(x, binwidth = .1, alpha = .5)
+```
+
+**EXPONENTIAL DISTRIBUTION** : a continuous distribution defined by the only parameter $\lambda$ with *probability density function* given by : $$f(x)=\lambda e^{-\lambda x}$$  
+
+with  
+
+* $\mu = \frac{1}{\lambda}$   
+
+* $Var(x) = \frac{1}{\lambda^2}$  
+
+```{r}
+x <- rexp(10000)
+qplot(x, binwidth = .1, alpha = .5)
+```
+
+
+**POISSON DISTRIBUTION** : has probability distribution $$P(X = x; \lambda) = \frac{\lambda^x e^{-\lambda}}{x!}$$ with $x \in {integers \geq 0}$  
+*  mean $\mu = \lambda$  
+*  variance $Var(x) = \lambda$  
+
+It is used for :  
+
+*  Modelling counting data  
+
+*  Modelling event-time or survival data  
+
+*  Modelling contingency tables  
+
+*  Approximating *binomial distribution* hen n is large and p is small:  
+$$X \sim Binomial(n, p)$$ $$\lambda = np with n very large and p very small$$
+
+* Rates $X \ sim Poisson(\lambda t)$ where:  
+    + t = total monitoring time
+    + $\lambda = E[frac{X}{t}]$ is the expected value per unit of time
+
+* EXAMPLE : The number of web hits to a site is Poisson with mean 16.5 per day. 
+What is the probability of getting 20 or fewer in 2 days expressed as a percentage to one decimal place?  
+```{r}
+round(ppois(20, lambda = 16.5 * 2) * 100, 1)
 ```   
 
+* EXAMPLE : The number of people who show up at a bus station is Poisson with mean $\lambda = 2.5\frac{person}{h}$.  
+If watching for t = 4h, what is the probability that 3 or fewer people show up for the whole time?  
+```{r}
+ppois(3, lambda = 2.5*4)
+```
 
 
+$\pagebreak$   
+
+##ASYMPTOTICS## 
+
+Behavior of statistics as the sample size n limits to infinity.  
+
+**LAW OF LARGE NUMBERS** or LLN : the average limits to what it is estimating 
+
+**CENTRAL LIMIT THEOREM** or CLT : if samples of size *n* are taken from a parent population with *mean* $\mu$ and *standard deviation* $\sigma$, then the distribution of their means will be approximately normal $$\bar{X} \sim N(\mu, \frac{\sigma}{\sqrt{n}})$$  
+If the parent population is of finite size N, two possibilities arise : 
+
+* if the sampling is carried out with replacement, the theorem stays as it is;  
+
+* if there is no replacement, the *standard deviation* of the sample means is : 
+$$\frac{\sigma}{\sqrt{n}}\sqrt{\frac{N-n}{N-1}}$$  
 
 
+**STANDARDISATION** or NORMALISATION: transformation of the values of the variables of a distribution, so that it has *mean* $\mu = 0$ and *standard deviation* $\sigma = 1$. *Normalisation* is carried out using the transformation : $$z = \frac{(x-\mu)}{\sigma}$$  
+where *x* is the original value and *z* the new value.  
 
+
+##CONFIDENCE INTERVAL AND HYPOTHESIS TESTING##  
+
+**CONFIDENCE INTERVAL** : that interval within which a *parameter* of a *parent population* is calculated (on the basis of sample data) to have a stated probability of lying.  
+
+* POPULATION ->  
+* SAMPLE ->  
+* STATISTIC (ex. mean = m) ->  
+* how accurate is m? how likely is that the true mean is m? ->  
+* the 95% interval os the interval $m \pm I$ so that there is a probability of 95% that the true mean lies within that interval 
+$$m \pm k\frac{\sigma}{\sqrt{n}}$$, with *k* depending on the confidence level and the sampling 
+
+Depending on the size of *n*, we have two cases:  
+
+* if **n is large** or $X \sim N(\mu, \sigma)$, then *k* is the *quantile* of a *normal distribution* 
+    + $Estimate \pm Z_q SE_{est}$, where $Z_q$ = *quantile of a standard normal* and $SE_{est}$  = *estimated standard error of the estimate*   
+    
+    + EXAMPLE : each observation $x_i$ is either 0 or 1, with success probability p and $Var(x) = \sigma = p(1-p)$. The interval take the form $$\hat{p}\pm z_{1-\frac{\alpha}{2}}\sqrt{\frac{p(1-p)}{n}}$$   
+    
+    + EXAMPLE : for the 95% confidence interval    
+    
+```{r,eval=FALSE}
+m + c(-1,1)*qnorm(.95)*sigma/sqrt(n)
+```   
+
+    
+* if **n is not large** and the parent *standard deviation* is unkown, then *k* is calculated on the basis of the **t-distribution**.  
 
